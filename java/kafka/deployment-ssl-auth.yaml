@@ -61,7 +61,7 @@ spec:
     spec:
       containers:
       - name: java-kafka-producer
-        image: quay.io/strimzi-examples/java-kafka-producer:latest
+        image: docker.io/owenerz/java-kafka-producer
         env:
           - name: CA_CRT
             valueFrom:
