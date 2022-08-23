@@ -3,10 +3,8 @@
  * License: Apache License 2.0 (see the file LICENSE or http://apache.org/licenses/LICENSE-2.0.html).
  */
 
-import io.jaegertracing.Configuration;
-import io.opentracing.Tracer;
-import io.opentracing.contrib.kafka.TracingProducerInterceptor;
-import io.opentracing.util.GlobalTracer;
+
+import io.opentelemetry.instrumentation.kafkaclients.TracingProducerInterceptor;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -35,11 +33,13 @@ public class KafkaProducerExample {
         List<Header> headers = null;
 
         if (System.getenv("JAEGER_SERVICE_NAME") != null)   {
-            Tracer tracer = Configuration.fromEnv().getTracer();
-            GlobalTracer.registerIfAbsent(tracer);
 
+            /*Tracer tracer = Configuration.fromEnv().getTracer();
+            GlobalTracer.registerIfAbsent(tracer);
+*/
             props.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, TracingProducerInterceptor.class.getName());
         }
+
 
         if (config.getHeaders() != null) {
             headers = new ArrayList<>();

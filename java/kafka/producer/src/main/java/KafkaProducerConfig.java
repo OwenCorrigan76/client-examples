@@ -18,6 +18,13 @@ public class KafkaProducerConfig {
 
     private static final long DEFAULT_MESSAGES_COUNT = 10;
     private static final String DEFAULT_MESSAGE = "Hello world";
+    private static final String DEFAULT_SERVICE_NAME = "my-cluster-kafka";
+    private static final String DEFAULT_EXPORTER_NAMES = "jaeger";
+    private static final String DEFAULT_METRICS_NAMES = "none";
+
+    private final String serviceName;
+    private final String tracesExporter;
+    private final String metricsExporter;
     private final String bootstrapServers;
     private final String topic;
     private final int delay;
@@ -36,10 +43,13 @@ public class KafkaProducerConfig {
     private final String additionalConfig;
     private final String saslLoginCallbackClass = "io.strimzi.kafka.oauth.client.JaasClientOauthLoginCallbackHandler";
 
-    public KafkaProducerConfig(String bootstrapServers, String topic, int delay, Long messageCount, String message,
+    public KafkaProducerConfig(String serviceName, String tracesExporter, String metricsExporter, String bootstrapServers, String topic, int delay, Long messageCount, String message,
                                String sslTruststoreCertificates, String sslKeystoreKey, String sslKeystoreCertificateChain,
                                String oauthClientId, String oauthClientSecret, String oauthAccessToken, String oauthRefreshToken,
                                String oauthTokenEndpointUri, String acks, String additionalConfig, String headers) {
+        this.serviceName = serviceName;
+        this.tracesExporter = tracesExporter;
+        this.metricsExporter = metricsExporter;
         this.bootstrapServers = bootstrapServers;
         this.topic = topic;
         this.delay = delay;
@@ -59,6 +69,10 @@ public class KafkaProducerConfig {
     }
 
     public static KafkaProducerConfig fromEnv() {
+        String serviceName = System.getenv("OTEL_SERVICE_NAME")  == null ? DEFAULT_SERVICE_NAME : System.getenv("OTEL_SERVICE_NAME");
+        String tracesExporterNames = System.getenv("OTEL_TRACES_EXPORTER")  == null ? DEFAULT_EXPORTER_NAMES : System.getenv("OTEL_TRACES_EXPORTER");
+        String metricsExporterNames = System.getenv("OTEL_METRICS_EXPORTER")  == null ? DEFAULT_METRICS_NAMES : System.getenv("OTEL_METRICS_EXPORTER");
+
         String bootstrapServers = System.getenv("BOOTSTRAP_SERVERS");
         String topic = System.getenv("TOPIC");
         int delay = Integer.parseInt(System.getenv("DELAY_MS"));
@@ -76,7 +90,7 @@ public class KafkaProducerConfig {
         String headers = System.getenv("HEADERS");
         String additionalConfig = System.getenv().getOrDefault("ADDITIONAL_CONFIG", "");
 
-        return new KafkaProducerConfig(bootstrapServers, topic, delay, messageCount, message, sslTruststoreCertificates,
+        return new KafkaProducerConfig(serviceName, tracesExporterNames, metricsExporterNames, bootstrapServers, topic, delay, messageCount, message, sslTruststoreCertificates,
                 sslKeystoreKey, sslKeystoreCertificateChain, oauthClientId, oauthClientSecret, oauthAccessToken, oauthRefreshToken,
                 oauthTokenEndpointUri, acks, additionalConfig, headers);
     }
@@ -88,14 +102,14 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
 
-        if (config.getSslTruststoreCertificates() != null)   {
+        if (config.getSslTruststoreCertificates() != null) {
             log.info("Configuring truststore");
             props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
             props.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "PEM");
             props.put(SslConfigs.SSL_TRUSTSTORE_CERTIFICATES_CONFIG, config.getSslTruststoreCertificates());
         }
 
-        if (config.getSslKeystoreCertificateChain() != null && config.getSslKeystoreKey() != null)   {
+        if (config.getSslKeystoreCertificateChain() != null && config.getSslKeystoreKey() != null) {
             log.info("Configuring keystore");
             props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
             props.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PEM");
@@ -120,7 +134,7 @@ public class KafkaProducerConfig {
 
         if ((config.getOauthAccessToken() != null)
                 || (config.getOauthTokenEndpointUri() != null && config.getOauthClientId() != null && config.getOauthRefreshToken() != null)
-                || (config.getOauthTokenEndpointUri() != null && config.getOauthClientId() != null && config.getOauthClientSecret() != null))    {
+                || (config.getOauthTokenEndpointUri() != null && config.getOauthClientId() != null && config.getOauthClientSecret() != null)) {
             log.info("Configuring OAuth");
             props.put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;");
             props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL".equals(props.getProperty(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG)) ? "SASL_SSL" : "SASL_PLAINTEXT");
@@ -135,6 +149,7 @@ public class KafkaProducerConfig {
 
         return props;
     }
+
     public String getBootstrapServers() {
         return bootstrapServers;
     }
@@ -202,22 +217,23 @@ public class KafkaProducerConfig {
     @Override
     public String toString() {
         return "KafkaProducerConfig{" +
-            "bootstrapServers='" + bootstrapServers + '\'' +
-            ", topic='" + topic + '\'' +
-            ", delay=" + delay +
-            ", messageCount=" + messageCount +
-            ", message='" + message + '\'' +
-            ", acks='" + acks + '\'' +
-            ", headers='" + headers + '\'' +
-            ", sslTruststoreCertificates='" + sslTruststoreCertificates + '\'' +
-            ", sslKeystoreKey='" + sslKeystoreKey + '\'' +
-            ", sslKeystoreCertificateChain='" + sslKeystoreCertificateChain + '\'' +
-            ", oauthClientId='" + oauthClientId + '\'' +
-            ", oauthClientSecret='" + oauthClientSecret + '\'' +
-            ", oauthAccessToken='" + oauthAccessToken + '\'' +
-            ", oauthRefreshToken='" + oauthRefreshToken + '\'' +
-            ", oauthTokenEndpointUri='" + oauthTokenEndpointUri + '\'' +
-            ", additionalConfig='" + additionalConfig + '\'' +
-            '}';
+                "serviceName='" + serviceName + '\'' +
+                "bootstrapServers='" + bootstrapServers + '\'' +
+                ", topic='" + topic + '\'' +
+                ", delay=" + delay +
+                ", messageCount=" + messageCount +
+                ", message='" + message + '\'' +
+                ", acks='" + acks + '\'' +
+                ", headers='" + headers + '\'' +
+                ", sslTruststoreCertificates='" + sslTruststoreCertificates + '\'' +
+                ", sslKeystoreKey='" + sslKeystoreKey + '\'' +
+                ", sslKeystoreCertificateChain='" + sslKeystoreCertificateChain + '\'' +
+                ", oauthClientId='" + oauthClientId + '\'' +
+                ", oauthClientSecret='" + oauthClientSecret + '\'' +
+                ", oauthAccessToken='" + oauthAccessToken + '\'' +
+                ", oauthRefreshToken='" + oauthRefreshToken + '\'' +
+                ", oauthTokenEndpointUri='" + oauthTokenEndpointUri + '\'' +
+                ", additionalConfig='" + additionalConfig + '\'' +
+                '}';
     }
 }
