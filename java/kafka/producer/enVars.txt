@@ -1,0 +1,17 @@
+# producer
+export BOOTSTRAP_SERVERS=192.168.39.128:32355
+export TOPIC=my-topic
+export DELAY_MS=1000
+export LOG_LEVEL=INFO
+export MESSAGE_COUNT=1000000
+export JAEGER_SERVICE_NAME=my-jaeger-collector:14267
+
+
+# streams
+export APPLICATION_ID=java-kafka-streams
+export SOURCE_TOPIC=my-topic
+export TARGET_TOPIC=my-topic-reversed
+
+# consumer
+export GROUP_ID=java-kafka-consumer
+export TOPIC=my-topic-reversed
