@@ -218,6 +218,8 @@ public class KafkaProducerConfig {
     public String toString() {
         return "KafkaProducerConfig{" +
                 "serviceName='" + serviceName + '\'' +
+                "tracesExporter='" + tracesExporter + '\'' +
+                "metricsExporter='" + metricsExporter + '\'' +
                 "bootstrapServers='" + bootstrapServers + '\'' +
                 ", topic='" + topic + '\'' +
                 ", delay=" + delay +

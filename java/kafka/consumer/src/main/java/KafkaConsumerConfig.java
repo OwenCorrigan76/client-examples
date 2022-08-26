@@ -3,6 +3,8 @@
  * License: Apache License 2.0 (see the file LICENSE or http://apache.org/licenses/LICENSE-2.0.html).
  */
 
+import io.opentelemetry.instrumentation.kafkaclients.TracingProducerInterceptor;
+
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.config.SaslConfigs;
@@ -17,6 +19,13 @@ public class KafkaConsumerConfig {
     private static final Logger log = LogManager.getLogger(KafkaConsumerConfig.class);
 
     private static final long DEFAULT_MESSAGES_COUNT = 10;
+    private static final String DEFAULT_SERVICE_NAME = "my-cluster-kafka";
+    private static final String DEFAULT_EXPORTER_NAMES = "jaeger";
+    private static final String DEFAULT_METRICS_NAMES = "none";
+
+    private final String serviceName;
+    private final String tracesExporter;
+    private final String metricsExporter;
     private final String bootstrapServers;
     private final String topic;
     private final String groupId;
@@ -36,10 +45,13 @@ public class KafkaConsumerConfig {
     private final String saslLoginCallbackClass = "io.strimzi.kafka.oauth.client.JaasClientOauthLoginCallbackHandler";
 
 
-    public KafkaConsumerConfig(String bootstrapServers, String topic, String groupId, String clientRack, Long messageCount,
+    public KafkaConsumerConfig(String serviceName, String tracesExporter, String metricsExporter, String bootstrapServers, String topic, String groupId, String clientRack, Long messageCount,
                                String sslTruststoreCertificates, String sslKeystoreKey, String sslKeystoreCertificateChain,
                                String oauthClientId, String oauthClientSecret, String oauthAccessToken, String oauthRefreshToken,
                                String oauthTokenEndpointUri, String additionalConfig) {
+        this.serviceName = serviceName;
+        this.tracesExporter = tracesExporter;
+        this.metricsExporter = metricsExporter;
         this.bootstrapServers = bootstrapServers;
         this.topic = topic;
         this.groupId = groupId;
@@ -57,6 +69,10 @@ public class KafkaConsumerConfig {
     }
 
     public static KafkaConsumerConfig fromEnv() {
+        String serviceName = System.getenv("OTEL_SERVICE_NAME")  == null ? DEFAULT_SERVICE_NAME : System.getenv("OTEL_SERVICE_NAME");
+        String tracesExporterNames = System.getenv("OTEL_TRACES_EXPORTER")  == null ? DEFAULT_EXPORTER_NAMES : System.getenv("OTEL_TRACES_EXPORTER");
+        String metricsExporterNames = System.getenv("OTEL_METRICS_EXPORTER")  == null ? DEFAULT_METRICS_NAMES : System.getenv("OTEL_METRICS_EXPORTER");
+
         String bootstrapServers = System.getenv("BOOTSTRAP_SERVERS");
         String topic = System.getenv("TOPIC");
         String groupId = System.getenv("GROUP_ID");
@@ -72,7 +88,7 @@ public class KafkaConsumerConfig {
         String oauthTokenEndpointUri = System.getenv("OAUTH_TOKEN_ENDPOINT_URI");
         String additionalConfig = System.getenv().getOrDefault("ADDITIONAL_CONFIG", "");
 
-        return new KafkaConsumerConfig(bootstrapServers, topic, groupId, clientRack, messageCount, sslTruststoreCertificates, sslKeystoreKey,
+        return new KafkaConsumerConfig(serviceName, tracesExporterNames, metricsExporterNames, bootstrapServers, topic, groupId, clientRack, messageCount, sslTruststoreCertificates, sslKeystoreKey,
                 sslKeystoreCertificateChain, oauthClientId, oauthClientSecret, oauthAccessToken, oauthRefreshToken, oauthTokenEndpointUri,
                 additionalConfig);
     }
@@ -89,14 +105,14 @@ public class KafkaConsumerConfig {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
 
-        if (config.getSslTruststoreCertificates() != null)   {
+        if (config.getSslTruststoreCertificates() != null) {
             log.info("Configuring truststore");
             props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
             props.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, "PEM");
             props.put(SslConfigs.SSL_TRUSTSTORE_CERTIFICATES_CONFIG, config.getSslTruststoreCertificates());
         }
 
-        if (config.getSslKeystoreCertificateChain() != null && config.getSslKeystoreKey() != null)   {
+        if (config.getSslKeystoreCertificateChain() != null && config.getSslKeystoreKey() != null) {
             log.info("Configuring keystore");
             props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL");
             props.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, "PEM");
@@ -121,7 +137,7 @@ public class KafkaConsumerConfig {
 
         if ((config.getOauthAccessToken() != null)
                 || (config.getOauthTokenEndpointUri() != null && config.getOauthClientId() != null && config.getOauthRefreshToken() != null)
-                || (config.getOauthTokenEndpointUri() != null && config.getOauthClientId() != null && config.getOauthClientSecret() != null))    {
+                || (config.getOauthTokenEndpointUri() != null && config.getOauthClientId() != null && config.getOauthClientSecret() != null)) {
             log.info("Configuring OAuth");
             props.put(SaslConfigs.SASL_JAAS_CONFIG, "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;");
             props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SSL".equals(props.getProperty(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG)) ? "SASL_SSL" : "SASL_PLAINTEXT");
@@ -136,6 +152,7 @@ public class KafkaConsumerConfig {
 
         return props;
     }
+
 
     public String getBootstrapServers() {
         return bootstrapServers;
@@ -204,22 +221,25 @@ public class KafkaConsumerConfig {
     @Override
     public String toString() {
         return "KafkaConsumerConfig{" +
-            "bootstrapServers='" + bootstrapServers + '\'' +
-            ", topic='" + topic + '\'' +
-            ", groupId='" + groupId + '\'' +
-            ", autoOffsetReset='" + autoOffsetReset + '\'' +
-            ", enableAutoCommit='" + enableAutoCommit + '\'' +
-            ", clientRack='" + clientRack + '\'' +
-            ", messageCount=" + messageCount +
-            ", sslTruststoreCertificates='" + sslTruststoreCertificates + '\'' +
-            ", sslKeystoreKey='" + sslKeystoreKey + '\'' +
-            ", sslKeystoreCertificateChain='" + sslKeystoreCertificateChain + '\'' +
-            ", oauthClientId='" + oauthClientId + '\'' +
-            ", oauthClientSecret='" + oauthClientSecret + '\'' +
-            ", oauthAccessToken='" + oauthAccessToken + '\'' +
-            ", oauthRefreshToken='" + oauthRefreshToken + '\'' +
-            ", oauthTokenEndpointUri='" + oauthTokenEndpointUri + '\'' +
-            ", additionalConfig='" + additionalConfig + '\'' +
-            '}';
+                "serviceName='" + serviceName + '\'' +
+                "tracesExporter='" + tracesExporter + '\'' +
+                "metricsExporter='" + metricsExporter + '\'' +
+                "bootstrapServers='" + bootstrapServers + '\'' +
+                ", topic='" + topic + '\'' +
+                ", groupId='" + groupId + '\'' +
+                ", autoOffsetReset='" + autoOffsetReset + '\'' +
+                ", enableAutoCommit='" + enableAutoCommit + '\'' +
+                ", clientRack='" + clientRack + '\'' +
+                ", messageCount=" + messageCount +
+                ", sslTruststoreCertificates='" + sslTruststoreCertificates + '\'' +
+                ", sslKeystoreKey='" + sslKeystoreKey + '\'' +
+                ", sslKeystoreCertificateChain='" + sslKeystoreCertificateChain + '\'' +
+                ", oauthClientId='" + oauthClientId + '\'' +
+                ", oauthClientSecret='" + oauthClientSecret + '\'' +
+                ", oauthAccessToken='" + oauthAccessToken + '\'' +
+                ", oauthRefreshToken='" + oauthRefreshToken + '\'' +
+                ", oauthTokenEndpointUri='" + oauthTokenEndpointUri + '\'' +
+                ", additionalConfig='" + additionalConfig + '\'' +
+                '}';
     }
 }

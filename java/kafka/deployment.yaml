@@ -48,6 +48,8 @@ spec:
             value: "INFO"
           - name: MESSAGE_COUNT
             value: "1000000"
+          - name: JAEGER_SERVICE_NAME
+            value: "my-jaeger-collector:14267"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -79,6 +81,8 @@ spec:
               value: my-topic-reversed
             - name: LOG_LEVEL
               value: "INFO"
+            - name: JAEGER_SERVICE_NAME
+              value: "my-jaeger-collector:14267"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -110,3 +114,5 @@ spec:
               value: "INFO"
             - name: MESSAGE_COUNT
               value: "1000000"
+            - name: JAEGER_SERVICE_NAME
+              value: "my-jaeger-collector:14267"

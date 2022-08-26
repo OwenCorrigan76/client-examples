@@ -3,9 +3,10 @@
  * License: Apache License 2.0 (see the file LICENSE or http://apache.org/licenses/LICENSE-2.0.html).
  */
 
+
 import io.jaegertracing.Configuration;
-import io.opentracing.Tracer;
-import io.opentracing.contrib.kafka.TracingConsumerInterceptor;
+import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.instrumentation.kafkaclients.TracingConsumerInterceptor;
 import io.opentracing.util.GlobalTracer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -18,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 
 public class KafkaConsumerExample {
     private static final Logger log = LogManager.getLogger(KafkaConsumerExample.class);
@@ -31,8 +33,8 @@ public class KafkaConsumerExample {
         int receivedMsgs = 0;
 
         if (System.getenv("JAEGER_SERVICE_NAME") != null)   {
-            Tracer tracer = Configuration.fromEnv().getTracer();
-            GlobalTracer.registerIfAbsent(tracer);
+            Tracer tracer = (Tracer) Configuration.fromEnv().getTracer();
+            GlobalTracer.registerIfAbsent((Callable<io.opentracing.Tracer>) tracer);
 
             props.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG, TracingConsumerInterceptor.class.getName());
         }
