@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
       - name: java-kafka-producer
-        image: docker.io/owenerz/java-kafka-producer
+        image: quay.io/strimzi-examples/java-kafka-producer:latest
         env:
           - name: BOOTSTRAP_SERVERS
             value: my-cluster-kafka-bootstrap:9092
@@ -48,8 +48,6 @@ spec:
             value: "INFO"
           - name: MESSAGE_COUNT
             value: "1000000"
-          - name: JAEGER_SERVICE_NAME
-            value: "my-jaeger-collector:14267"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -69,7 +67,7 @@ spec:
     spec:
       containers:
         - name: java-kafka-streams
-          image: docker.io/owenerz/java-kafka-streams
+          image: quay.io/strimzi-examples/java-kafka-streams:latest
           env:
             - name: BOOTSTRAP_SERVERS
               value: my-cluster-kafka-bootstrap:9092
@@ -81,8 +79,6 @@ spec:
               value: my-topic-reversed
             - name: LOG_LEVEL
               value: "INFO"
-            - name: JAEGER_SERVICE_NAME
-              value: "my-jaeger-collector:14267"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -102,7 +98,7 @@ spec:
     spec:
       containers:
         - name: java-kafka-consumer
-          image: docker.io/owenerz/java-kafka-consumer
+          image: quay.io/strimzi-examples/java-kafka-consumer:latest
           env:
             - name: BOOTSTRAP_SERVERS
               value: my-cluster-kafka-bootstrap:9092
@@ -114,5 +110,3 @@ spec:
               value: "INFO"
             - name: MESSAGE_COUNT
               value: "1000000"
-            - name: JAEGER_SERVICE_NAME
-              value: "my-jaeger-collector:14267"

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: java-kafka-streams
-        image: docker.io/owenerz/java-kafka-streams
+        image: quay.io/strimzi-examples/java-kafka-streams:latest
         env:
           - name: BOOTSTRAP_SERVERS
             value: my-source-cluster-kafka-bootstrap:9092

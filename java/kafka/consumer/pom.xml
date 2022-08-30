@@ -35,31 +35,25 @@
             <groupId>io.jaegertracing</groupId>
             <artifactId>jaeger-client</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>io.opentracing.contrib</groupId>
+            <artifactId>opentracing-kafka-client</artifactId>
+        </dependency>
         <dependency>
             <groupId>io.strimzi</groupId>
             <artifactId>kafka-oauth-client</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>strimzi.io</groupId>
-            <artifactId>java-kafka-streams</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
         <dependency>
             <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-exporter-jaeger</artifactId>
+            <artifactId>opentelemetry-api</artifactId>
             <version>1.17.0</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
             <artifactId>opentelemetry-kafka-clients-2.6</artifactId>
             <version>1.17.0-alpha</version>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-sdk-extension-autoconfigure</artifactId>
-            <version>1.17.0-alpha</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

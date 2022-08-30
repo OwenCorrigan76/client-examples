@@ -48,6 +48,10 @@
             <artifactId>opentelemetry-sdk-extension-autoconfigure</artifactId>
             <version>1.17.0-alpha</version>
         </dependency>
+        <dependency>
+            <groupId>io.opentracing.contrib</groupId>
+            <artifactId>opentracing-kafka-client</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

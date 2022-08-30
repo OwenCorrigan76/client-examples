@@ -7,7 +7,7 @@
 import io.jaegertracing.Configuration;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.instrumentation.kafkaclients.TracingConsumerInterceptor;
-import io.opentracing.util.GlobalTracer;
+// import io.opentracing.util.GlobalTracer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -33,8 +33,8 @@ public class KafkaConsumerExample {
         int receivedMsgs = 0;
 
         if (System.getenv("JAEGER_SERVICE_NAME") != null)   {
-            Tracer tracer = (Tracer) Configuration.fromEnv().getTracer();
-            GlobalTracer.registerIfAbsent((Callable<io.opentracing.Tracer>) tracer);
+        //    Tracer tracer = (Tracer) Configuration.fromEnv().getTracer();
+          //  GlobalTracer.registerIfAbsent((Callable<io.opentracing.Tracer>) tracer);
 
             props.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG, TracingConsumerInterceptor.class.getName());
         }

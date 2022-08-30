@@ -5,6 +5,7 @@
 
 
 import io.opentelemetry.instrumentation.kafkaclients.TracingProducerInterceptor;
+// import io.opentracing.contrib.kafka.TracingProducerInterceptor;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
