@@ -3,7 +3,7 @@
  * License: Apache License 2.0 (see the file LICENSE or http://apache.org/licenses/LICENSE-2.0.html).
  */
 
-// import io.opentelemetry.instrumentation.kafkaclients.TracingProducerInterceptor;
+
 
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -68,7 +68,8 @@ public class KafkaConsumerConfig {
         this.additionalConfig = additionalConfig;
     }
 
-    public static KafkaConsumerConfig fromEnv() {
+    public static KafkaConsumerConfig fromEnv() { // Populate JAEGER_SERVICE_NAME and OTEL_SERVICE_NAME with User defined JAEGER_SERVICE_NAME
+        // because OpeTracing uses JAEGER_SERVICE_NAME and OpenTelemetry uses OTEL_SERVICE_NAME.
         String serviceName = System.getenv("OTEL_SERVICE_NAME")  == null ? DEFAULT_SERVICE_NAME : System.getenv("OTEL_SERVICE_NAME");
         String tracesExporterNames = System.getenv("OTEL_TRACES_EXPORTER")  == null ? DEFAULT_EXPORTER_NAMES : System.getenv("OTEL_TRACES_EXPORTER");
         String metricsExporterNames = System.getenv("OTEL_METRICS_EXPORTER")  == null ? DEFAULT_METRICS_NAMES : System.getenv("OTEL_METRICS_EXPORTER");

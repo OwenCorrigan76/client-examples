@@ -4,10 +4,14 @@
  */
 
 
+// import io.jaegertracing.Configuration;
+// import io.opentelemetry.api.trace.Tracer;
+
 import io.jaegertracing.Configuration;
-import io.opentelemetry.api.trace.Tracer;
+import io.opentracing.Tracer;
+import io.opentracing.contrib.kafka.TracingProducerInterceptor;
+import io.opentracing.util.GlobalTracer;
 import io.opentelemetry.instrumentation.kafkaclients.TracingConsumerInterceptor;
-// import io.opentracing.util.GlobalTracer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;

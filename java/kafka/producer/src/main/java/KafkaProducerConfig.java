@@ -22,10 +22,13 @@ public class KafkaProducerConfig {
     private static final String DEFAULT_EXPORTER_NAMES = "jaeger";
     private static final String DEFAULT_METRICS_NAMES = "none";
 
+    private static final boolean DEFAULT_OPENTRACING_ENABLED = true;
+
     private final String serviceName;
     private final String tracesExporter;
     private final String metricsExporter;
     private final String bootstrapServers;
+    private final boolean openTracingEnabled;
     private final String topic;
     private final int delay;
     private final Long messageCount;
@@ -43,13 +46,14 @@ public class KafkaProducerConfig {
     private final String additionalConfig;
     private final String saslLoginCallbackClass = "io.strimzi.kafka.oauth.client.JaasClientOauthLoginCallbackHandler";
 
-    public KafkaProducerConfig(String serviceName, String tracesExporter, String metricsExporter, String bootstrapServers, String topic, int delay, Long messageCount, String message,
+    public KafkaProducerConfig(String serviceName, String tracesExporter, String metricsExporter, boolean openTracingEnabled, String bootstrapServers, String topic, int delay, Long messageCount, String message,
                                String sslTruststoreCertificates, String sslKeystoreKey, String sslKeystoreCertificateChain,
                                String oauthClientId, String oauthClientSecret, String oauthAccessToken, String oauthRefreshToken,
                                String oauthTokenEndpointUri, String acks, String additionalConfig, String headers) {
         this.serviceName = serviceName;
         this.tracesExporter = tracesExporter;
         this.metricsExporter = metricsExporter;
+        this.openTracingEnabled = openTracingEnabled;
         this.bootstrapServers = bootstrapServers;
         this.topic = topic;
         this.delay = delay;
@@ -73,6 +77,14 @@ public class KafkaProducerConfig {
         String tracesExporterNames = System.getenv("OTEL_TRACES_EXPORTER")  == null ? DEFAULT_EXPORTER_NAMES : System.getenv("OTEL_TRACES_EXPORTER");
         String metricsExporterNames = System.getenv("OTEL_METRICS_EXPORTER")  == null ? DEFAULT_METRICS_NAMES : System.getenv("OTEL_METRICS_EXPORTER");
 
+        boolean openTracingEnabled = System.getenv("OPENTRACING_ENABLED")  == null ? DEFAULT_OPENTRACING_ENABLED : Boolean.parseBoolean(System.getenv("OPENTRACING_ENABLED"));
+
+        // TODO: Find out whether we can put OpenTelemetry config values in Kafka properties file
+        // TODO: Find out how to swt ENV VAR values through Java
+        // System.setenv("OTEL_SERVICE_NAME", serviceName);
+        // System.setenv("OTEL_TRACES_EXPORTER", tracesExporterNames);
+        // System.setenv("OTEL_METRICS_EXPORTER", metricsExporterNames);
+
         String bootstrapServers = System.getenv("BOOTSTRAP_SERVERS");
         String topic = System.getenv("TOPIC");
         int delay = Integer.parseInt(System.getenv("DELAY_MS"));
@@ -90,7 +102,7 @@ public class KafkaProducerConfig {
         String headers = System.getenv("HEADERS");
         String additionalConfig = System.getenv().getOrDefault("ADDITIONAL_CONFIG", "");
 
-        return new KafkaProducerConfig(serviceName, tracesExporterNames, metricsExporterNames, bootstrapServers, topic, delay, messageCount, message, sslTruststoreCertificates,
+        return new KafkaProducerConfig(serviceName, tracesExporterNames, metricsExporterNames, openTracingEnabled, bootstrapServers, topic, delay, messageCount, message, sslTruststoreCertificates,
                 sslKeystoreKey, sslKeystoreCertificateChain, oauthClientId, oauthClientSecret, oauthAccessToken, oauthRefreshToken,
                 oauthTokenEndpointUri, acks, additionalConfig, headers);
     }
@@ -101,6 +113,7 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.ACKS_CONFIG, config.getAcks());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
+        //props.put(ProducerConfig.OTEL_SERVICE_NAME, config.getOt);
 
         if (config.getSslTruststoreCertificates() != null) {
             log.info("Configuring truststore");
@@ -148,6 +161,10 @@ public class KafkaProducerConfig {
         props.putAll(additionalProps);
 
         return props;
+    }
+
+    public boolean getOpenTracingEnabled() {
+        return openTracingEnabled;
     }
 
     public String getBootstrapServers() {

@@ -3,9 +3,19 @@
  * License: Apache License 2.0 (see the file LICENSE or http://apache.org/licenses/LICENSE-2.0.html).
  */
 
-
-import io.opentelemetry.instrumentation.kafkaclients.TracingProducerInterceptor;
+// import io.jaegertracing.Configuration;
+// import io.opentracing.Tracer;
 // import io.opentracing.contrib.kafka.TracingProducerInterceptor;
+
+//import io.jaegertracing.Configuration;
+//import io.opentracing.Tracer;
+//import io.opentracing.contrib.kafka.TracingProducerInterceptor;
+//import io.opentracing.util.GlobalTracer;
+//import io.opentracing.util.GlobalTracerort io.opentracing.util.GlobalTracer;
+import io.jaegertracing.Configuration;
+//import io.opentelemetry.instrumentation.kafkaclients.TracingProducerInterceptor;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -34,11 +44,16 @@ public class KafkaProducerExample {
         List<Header> headers = null;
 
         if (System.getenv("JAEGER_SERVICE_NAME") != null)   {
-
-            /*Tracer tracer = Configuration.fromEnv().getTracer();
-            GlobalTracer.registerIfAbsent(tracer);
-*/
-            props.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, TracingProducerInterceptor.class.getName());
+            // TODO: Add OPENTRACING_ENABLED and OPENTELEMETRY_ENABLED env vars in KafkaProducerConfig.java files
+            if ( config.getOpenTracingEnabled() ) {
+                Tracer tracer = Configuration.fromEnv().getTracer();
+                GlobalTracer.registerIfAbsent(tracer);
+                props.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, io.opentracing.contrib.kafka.TracingProducerInterceptor.class.getName());
+             }
+            // if ( config.getOpenTelemetryEnabled() ) {
+            //If using OpenTelementry
+                props.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, io.opentelemetry.instrumentation.kafkaclients.TracingProducerInterceptor.class.getName());
+            // }
         }
 
 
