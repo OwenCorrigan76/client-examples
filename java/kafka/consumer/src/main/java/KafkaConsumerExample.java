@@ -9,13 +9,12 @@
 
 import io.jaegertracing.Configuration;
 import io.opentracing.Tracer;
-import io.opentracing.contrib.kafka.TracingProducerInterceptor;
 import io.opentracing.util.GlobalTracer;
-import io.opentelemetry.instrumentation.kafkaclients.TracingConsumerInterceptor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.header.Header;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -36,11 +35,15 @@ public class KafkaConsumerExample {
         Properties props = KafkaConsumerConfig.createProperties(config);
         int receivedMsgs = 0;
 
-        if (System.getenv("JAEGER_SERVICE_NAME") != null)   {
-        //    Tracer tracer = (Tracer) Configuration.fromEnv().getTracer();
-          //  GlobalTracer.registerIfAbsent((Callable<io.opentracing.Tracer>) tracer);
-
-            props.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG, TracingConsumerInterceptor.class.getName());
+        if (System.getenv("JAEGER_SERVICE_NAME") != null) {
+            if (config.getOpenTracingEnabled()) {
+                Tracer tracer = (Tracer) Configuration.fromEnv().getTracer();
+                GlobalTracer.registerIfAbsent((Callable<io.opentracing.Tracer>) tracer);
+                props.put(ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG,io.opentracing.contrib.kafka.TracingProducerInterceptor.class.getName());
+            }
+            if ( config.getOpenTelemetryEnabled() ) {
+                props.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, io.opentelemetry.instrumentation.kafkaclients.TracingProducerInterceptor.class.getName());
+            }
         }
 
         boolean commit = !Boolean.parseBoolean(config.getEnableAutoCommit());

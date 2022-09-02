@@ -5,7 +5,7 @@ export DELAY_MS=1000
 export LOG_LEVEL=INFO
 export MESSAGE_COUNT=1000000
 export JAEGER_SERVICE_NAME=my-jaeger-collector:14267
-
+# export OPENTRACING_ENABLED=true
 
 # streams
 export APPLICATION_ID=java-kafka-streams

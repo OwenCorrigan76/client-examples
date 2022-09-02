@@ -38,6 +38,8 @@ spec:
       - name: java-kafka-producer
         image: docker.io/owenerz/java-kafka-producer
         env:
+         # - name: OPENTRACING_ENABLED
+         #   value: false
           - name: BOOTSTRAP_SERVERS
             value: my-cluster-kafka-bootstrap:9092
           - name: TOPIC
@@ -81,6 +83,8 @@ spec:
         - name: java-kafka-streams
           image: docker.io/owenerz/java-kafka-streams
           env:
+          #  - name: OPENTRACING_ENABLED
+          #    value: false
             - name: BOOTSTRAP_SERVERS
               value: my-cluster-kafka-bootstrap:9092
             - name: APPLICATION_ID
@@ -124,6 +128,8 @@ spec:
         - name: java-kafka-consumer
           image: docker.io/owenerz/java-kafka-consumer
           env:
+           # - name: OPENTRACING_ENABLED
+           #   value: false
             - name: BOOTSTRAP_SERVERS
               value: my-cluster-kafka-bootstrap:9092
             - name: TOPIC

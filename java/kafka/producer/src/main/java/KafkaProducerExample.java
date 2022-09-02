@@ -13,7 +13,6 @@
 //import io.opentracing.util.GlobalTracer;
 //import io.opentracing.util.GlobalTracerort io.opentracing.util.GlobalTracer;
 import io.jaegertracing.Configuration;
-//import io.opentelemetry.instrumentation.kafkaclients.TracingProducerInterceptor;
 import io.opentracing.Tracer;
 import io.opentracing.util.GlobalTracer;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -44,16 +43,14 @@ public class KafkaProducerExample {
         List<Header> headers = null;
 
         if (System.getenv("JAEGER_SERVICE_NAME") != null)   {
-            // TODO: Add OPENTRACING_ENABLED and OPENTELEMETRY_ENABLED env vars in KafkaProducerConfig.java files
             if ( config.getOpenTracingEnabled() ) {
                 Tracer tracer = Configuration.fromEnv().getTracer();
                 GlobalTracer.registerIfAbsent(tracer);
                 props.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, io.opentracing.contrib.kafka.TracingProducerInterceptor.class.getName());
              }
-            // if ( config.getOpenTelemetryEnabled() ) {
-            //If using OpenTelementry
+             if ( config.getOpenTelemetryEnabled() ) {
                 props.put(ProducerConfig.INTERCEPTOR_CLASSES_CONFIG, io.opentelemetry.instrumentation.kafkaclients.TracingProducerInterceptor.class.getName());
-            // }
+            }
         }
 
 

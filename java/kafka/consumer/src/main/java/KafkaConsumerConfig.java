@@ -23,9 +23,14 @@ public class KafkaConsumerConfig {
     private static final String DEFAULT_EXPORTER_NAMES = "jaeger";
     private static final String DEFAULT_METRICS_NAMES = "none";
 
+    private static final boolean DEFAULT_OPENTRACING_ENABLED = true;
+    private static final boolean DEFAULT_OPENTELEMETRY_ENABLED = true;
+
     private final String serviceName;
     private final String tracesExporter;
     private final String metricsExporter;
+    private final boolean openTracingEnabled;
+    private final boolean openTelemetryEnabled;
     private final String bootstrapServers;
     private final String topic;
     private final String groupId;
@@ -45,13 +50,16 @@ public class KafkaConsumerConfig {
     private final String saslLoginCallbackClass = "io.strimzi.kafka.oauth.client.JaasClientOauthLoginCallbackHandler";
 
 
-    public KafkaConsumerConfig(String serviceName, String tracesExporter, String metricsExporter, String bootstrapServers, String topic, String groupId, String clientRack, Long messageCount,
+    public KafkaConsumerConfig(String serviceName, String tracesExporter, String metricsExporter,boolean openTracingEnabled,  boolean openTelemetryEnabled,
+    String bootstrapServers, String topic, String groupId, String clientRack, Long messageCount,
                                String sslTruststoreCertificates, String sslKeystoreKey, String sslKeystoreCertificateChain,
                                String oauthClientId, String oauthClientSecret, String oauthAccessToken, String oauthRefreshToken,
                                String oauthTokenEndpointUri, String additionalConfig) {
         this.serviceName = serviceName;
         this.tracesExporter = tracesExporter;
         this.metricsExporter = metricsExporter;
+        this.openTracingEnabled = openTracingEnabled;
+        this.openTelemetryEnabled = openTelemetryEnabled;
         this.bootstrapServers = bootstrapServers;
         this.topic = topic;
         this.groupId = groupId;
@@ -74,6 +82,9 @@ public class KafkaConsumerConfig {
         String tracesExporterNames = System.getenv("OTEL_TRACES_EXPORTER")  == null ? DEFAULT_EXPORTER_NAMES : System.getenv("OTEL_TRACES_EXPORTER");
         String metricsExporterNames = System.getenv("OTEL_METRICS_EXPORTER")  == null ? DEFAULT_METRICS_NAMES : System.getenv("OTEL_METRICS_EXPORTER");
 
+        boolean openTracingEnabled = System.getenv("OPENTRACING_ENABLED")  == null ? DEFAULT_OPENTRACING_ENABLED : Boolean.parseBoolean(System.getenv("OPENTRACING_ENABLED"));
+        boolean openTelemetryEnabled = System.getenv("OPENTELEMETRY_ENABLED")  == null ? DEFAULT_OPENTELEMETRY_ENABLED : Boolean.parseBoolean(System.getenv("OPENTELEMETRY_ENABLED"));
+
         String bootstrapServers = System.getenv("BOOTSTRAP_SERVERS");
         String topic = System.getenv("TOPIC");
         String groupId = System.getenv("GROUP_ID");
@@ -89,7 +100,7 @@ public class KafkaConsumerConfig {
         String oauthTokenEndpointUri = System.getenv("OAUTH_TOKEN_ENDPOINT_URI");
         String additionalConfig = System.getenv().getOrDefault("ADDITIONAL_CONFIG", "");
 
-        return new KafkaConsumerConfig(serviceName, tracesExporterNames, metricsExporterNames, bootstrapServers, topic, groupId, clientRack, messageCount, sslTruststoreCertificates, sslKeystoreKey,
+        return new KafkaConsumerConfig(serviceName, tracesExporterNames, metricsExporterNames, openTracingEnabled, openTelemetryEnabled, bootstrapServers, topic, groupId, clientRack, messageCount, sslTruststoreCertificates, sslKeystoreKey,
                 sslKeystoreCertificateChain, oauthClientId, oauthClientSecret, oauthAccessToken, oauthRefreshToken, oauthTokenEndpointUri,
                 additionalConfig);
     }
@@ -154,6 +165,13 @@ public class KafkaConsumerConfig {
         return props;
     }
 
+    public boolean getOpenTracingEnabled() {
+        return openTracingEnabled;
+    }
+
+    public boolean getOpenTelemetryEnabled() {
+        return openTelemetryEnabled;
+    }
 
     public String getBootstrapServers() {
         return bootstrapServers;
