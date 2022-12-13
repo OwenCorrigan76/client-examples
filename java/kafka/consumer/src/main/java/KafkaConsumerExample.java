@@ -43,7 +43,7 @@ public class KafkaConsumerExample {
             }
         }
 
-       boolean commit = !Boolean.parseBoolean (props.getProperty(ENABLE_AUTO_COMMIT_CONFIG));
+       boolean commit = !Boolean.parseBoolean(props.getProperty(ENABLE_AUTO_COMMIT_CONFIG));
         KafkaConsumer consumer = new KafkaConsumer(props);
         consumer.subscribe(Collections.singletonList(config.getTopic()));
 
