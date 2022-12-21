@@ -19,6 +19,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.apache.kafka.clients.producer.ProducerConfig.TRANSACTIONAL_ID_CONFIG;
+
+
 public class KafkaProducerExample {
     private static final Logger log = LogManager.getLogger(KafkaProducerExample.class);
 
@@ -27,7 +30,7 @@ public class KafkaProducerExample {
 
         log.info(KafkaProducerConfig.class.getName() + ": {}", config.toString());
 
-        Properties props = KafkaProducerConfig.createProperties(config);
+        Properties props = config.getProperties();
         List<Header> headers = null;
 
         TracingSystem tracingSystem = config.getTracingSystem();
@@ -57,8 +60,9 @@ public class KafkaProducerExample {
         KafkaProducer producer = new KafkaProducer(props);
         log.info("Sending {} messages ...", config.getMessageCount());
 
+        // Address
         boolean blockProducer = System.getenv("BLOCKING_PRODUCER") != null;
-        boolean transactionalProducer = config.getAdditionalConfig().contains("transactional.id");
+        boolean transactionalProducer = Boolean.parseBoolean(props.getProperty(TRANSACTIONAL_ID_CONFIG));
         int msgPerTx = Integer.parseInt(System.getenv().getOrDefault("MESSAGES_PER_TRANSACTION", "10"));
         if(transactionalProducer) {
             log.info("Using transactional producer. Initializing the transactions ...");
@@ -88,7 +92,6 @@ public class KafkaProducerExample {
                 log.info("Committing the transaction. Messages sent: {}", i);
                 producer.commitTransaction();
             }
-
             Thread.sleep(config.getDelay());
         }
 

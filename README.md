@@ -57,26 +57,19 @@ To run the OAuth example, you will need to have your Kafka cluster configured wi
 ## Configuration
 
 Although this Hello World is simple example it is fully configurable.
-Below are listed and described environmental variables. 
-Regarding Consumer Only (until later updates): below are listed and described environmental variables that are NOT Kafka-specific but must be used. 
+Below are listed and described environmental variables.
+
+Regarding Consumer and Producer Only (until later updates): below are listed and described environmental variables that are NOT Kafka-specific but must be used. 
 These environmental variables should be prefixed with `STRIMZI_`, e.g. `STRIMZI_TOPIC`. 
 Any Kafka configuration option can be given as an environmental variable and should be prefixed with `KAFKA_` using `_` instead of `.` , e.g. `bootstrap.servers` -> `KAFKA_BOOTSTRAP_SERVERS`.
 
 Producer  
-* `BOOTSTRAP_SERVERS` - comma-separated host and port pairs that is a list of Kafka broker addresses. The form of pair is `host:port`, e.g. `my-cluster-kafka-bootstrap:9092` 
-* `TOPIC` - the topic the producer will send to  
-* `DELAY_MS` - the delay, in ms, between messages  
-* `MESSAGE_COUNT` - the number of messages the producer should send  
-* `CA_CRT` - the certificate of the CA which signed the brokers' TLS certificates, for adding to the client's trust store
-* `USER_CRT` - the user's certificate
-* `USER_KEY` - the user's private key
-* `LOG_LEVEL` - logging level  
-* `PRODUCER_ACKS` - acknowledgement level
-* `HEADERS` - custom headers list separated by commas of `key1=value1, key2=value2`
-* `BLOCKING_PRODUCER` - if it's set, the producer will block another message until ack will be received
-* `MESSAGES_PER_TRANSACTION` - how many messages will be part of one transaction. Transaction config could be set via `ADDITIONAL_CONFIG` variable. Default is 10.
-* `ADDITIONAL_CONFIG` - additional configuration for a producer application. Notice, that you can also override any previously set variable by setting this. The form is `key=value` records separated by new line character
-* `TRACING_SYSTEM` - if it's set to `jaeger` or `opentelemetry`, this will enable tracing. 
+* `STRIMZI_TOPIC` - the topic the producer will send to  
+* `STRIMZI_DELAY_MS` - the delay, in ms, between messages  
+* `STRIMZI_MESSAGE_COUNT` - the number of messages the producer should send  
+* `STRIMZI_LOG_LEVEL` - logging level  
+* `STRIMZI_HEADERS` - custom headers list separated by commas of `key1=value1, key2=value2`
+* `STRIMZI_TRACING_SYSTEM` - if it's set to `jaeger` or `opentelemetry`, this will enable tracing. 
 
 Consumer  
 * `STRIMZI_TOPIC` - name of topic which consumer subscribes  
