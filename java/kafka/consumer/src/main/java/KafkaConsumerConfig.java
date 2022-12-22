@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 public class KafkaConsumerConfig {
     private static final long DEFAULT_MESSAGES_COUNT = 10;
-    private static final String KAFKA_PREFIX = "KAFKA_";
 
     private final String topic;
     private final Long messageCount;
@@ -31,13 +30,9 @@ public class KafkaConsumerConfig {
         properties.putAll(System.getenv()
                 .entrySet()
                 .stream()
-                .filter(mapEntry -> mapEntry.getKey().startsWith(KAFKA_PREFIX))
-                .collect(Collectors.toMap(mapEntry -> convertEnvVarToPropertyKey(mapEntry.getKey()), Map.Entry::getValue)));
+                .filter(mapEntry -> mapEntry.getKey().startsWith(CommonConfig.KAFKA_PREFIX))
+                .collect(Collectors.toMap(mapEntry -> CommonConfig.convertEnvVarToPropertyKey(mapEntry.getKey()), Map.Entry::getValue)));
         return new KafkaConsumerConfig(topic, messageCount, tracingSystem, properties);
-    }
-
-    private static String convertEnvVarToPropertyKey(String envVar) {
-        return envVar.substring(envVar.indexOf("_") + 1).toLowerCase().replace("_", ".");
     }
 
     public String getTopic() {
