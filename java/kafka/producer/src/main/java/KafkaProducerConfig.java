@@ -52,7 +52,7 @@ public class KafkaProducerConfig {
         return new KafkaProducerConfig(topic, messageCount, delay, message, headers, tracingSystem, properties);
     }
 
-    public static String convertEnvVarToPropertyKey(String envVar) {
+    private static String convertEnvVarToPropertyKey(String envVar) {
         return envVar.substring(envVar.indexOf("_") + 1).toLowerCase().replace("_", ".");
     }
 
