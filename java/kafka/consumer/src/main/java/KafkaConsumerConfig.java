@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-public class KafkaConsumerConfig {
+public class KafkaConsumerConfig extends AbstractConfig {
     private static final long DEFAULT_MESSAGES_COUNT = 10;
 
     private final String topic;
@@ -21,17 +21,19 @@ public class KafkaConsumerConfig {
         this.tracingSystem = tracingSystem;
         this.properties = properties;
     }
-
+// call this from the super class
     public static KafkaConsumerConfig fromEnv() {
+        super.fromEnv();
         String topic = System.getenv("STRIMZI_TOPIC");
         Long messageCount = System.getenv("STRIMZI_MESSAGE_COUNT") == null ? DEFAULT_MESSAGES_COUNT : Long.parseLong(System.getenv("STRIMZI_MESSAGE_COUNT"));
         TracingSystem tracingSystem = TracingSystem.forValue(System.getenv().getOrDefault("STRIMZI_TRACING_SYSTEM", ""));
-        Properties properties = new Properties();
+        /*Properties properties = new Properties();
         properties.putAll(System.getenv()
                 .entrySet()
                 .stream()
-                .filter(mapEntry -> mapEntry.getKey().startsWith(CommonConfig.KAFKA_PREFIX))
-                .collect(Collectors.toMap(mapEntry -> CommonConfig.convertEnvVarToPropertyKey(mapEntry.getKey()), Map.Entry::getValue)));
+                .filter(mapEntry -> mapEntry.getKey().startsWith(AbstractConfig.KAFKA_PREFIX))
+                .collect(Collectors.toMap(mapEntry -> AbstractConfig.convertEnvVarToPropertyKey(mapEntry.getKey()), Map.Entry::getValue)));
+         */
         return new KafkaConsumerConfig(topic, messageCount, tracingSystem, properties);
     }
 
